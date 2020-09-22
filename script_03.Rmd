@@ -40,8 +40,12 @@ sep_old <-
          title = course_title,
          name = course_name,
          department = course_department) %>% 
-  filter(u_grad > 10)
-
+  filter(u_grad > 10) %>% 
+  group_by(id, title) %>% 
+  summarize(ugrad_sum = sum(u_grad), .groups = "drop") %>% 
+  arrange(title)
+  
+sep_old
 # But this is not correct! Look for Gov 50: Data. What do you see? What can you
 # do to clean it up?
 ```
@@ -51,6 +55,27 @@ sep_old <-
 
 **Prompt:** Read in and clean the new data, creating an object called `sep_new`. 
 
+```{r s1}
+
+sep_new <- 
+  read_excel("new_data/new_data.xlsx", 
+             skip = 3) %>% 
+  clean_names() %>% 
+  filter(! is.na(course_title)) %>% 
+  select(-grad, -non_degree, -x_reg, -vus, -employee, 
+         -withdraw, -total, -instructor_full_name, -course_section_code) %>%
+  rename(id = course_id,
+         title = course_title,
+         name = course_name,
+         department = course_department) %>% 
+  filter(u_grad > 10) %>% 
+  group_by(id, title) %>% 
+  summarize(ugrad_sum = sum(u_grad), .groups = "drop") %>% 
+  arrange(title)
+  
+sep_new
+  
+```
 
 
 ### Scene 2
@@ -60,12 +85,17 @@ sep_old <-
 
 Before we start on the model, Wisdom suggests we should:
 
-
+* Make assumptions to limit the data frame
+* Throw out duplicate variables
+* Remove columns that we are uninterested in
+* Define the variables we wish to evaluate (variables of interest), in this model time: sep_old enrollment vs. sep_new enrollment
 
 
 After we have a model, Temperance suggests we should:
 
-
+* Acknowledge that this year is very different in terms of college enrollment due to COVID-19, which would affect the internal validity
+* Cannot be generalized across different years
+* Since the enrollment data does not include LOA population of Harvard, the data set does not include potential outcomes of this demographic of the Harvard population (these students could have been more likely switch courses and adjust the enrollment data)
 
 ### Scene 3
 
